@@ -58,7 +58,7 @@
                 <label for="exampleInputPassword1">Full Name: </label>
                 <input type="text" name="fullname" class="form-control" id="exampleInputPassword1" placeholder="Enter your full name...">
             </div>
-            
+
             <button type="submit" name="sbt" class="btn btn-primary">Submit</button>
             <br><br>
         </form>
@@ -69,9 +69,18 @@
 
 
 <?php
-if(isset($_POST['sbt'])){
+if (isset($_POST['sbt'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
     $fullname = $_POST['fullname'];
+    include("db.php");
+    try {
+        $query = "INSERT INTO users(user_name, user_password, user_fullname) VALUES (?,?,?)";
+        $stmt = $stmt = $conn->prepare($query);
+        $stmt->execute([$username, $password, $fullname]);
+        echo "Done";
+    } catch (Exception $e) {
+        echo "Insertion failed!";
+    }
 }
 ?>
