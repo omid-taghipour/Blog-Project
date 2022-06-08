@@ -6,11 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Sign up</title>
+    <title>Document</title>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar navbar-dark bg-primary">
+        <?php
+        @session_start();
+        if (!isset($_SESSION['user_id'])) {
+            echo '<script>location.href="login.php"</script>';
+        }
+        ?>
         <div class="container">
             <a class="navbar-brand" href="index.php">327Blogs</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,47 +47,32 @@
     </nav>
     <br>
     <div class="container">
-        <div class="jumbotron">
-            <h1 class="text-center">Sign up to blog application</h1>
-            <p>Please fill the form below to sign up in the system.</p>
-        </div>
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
-            <div class="form-group">
-                <label for="exampleInputEmail1">User Name:</label>
-                <input type="text" name="username" class="form-control" placeholder="Enter your username...">
-            </div>
-            <div class="form-group">
-                <label for="exampleInputPassword1">Password: </label>
-                <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Enter your password...">
-            </div>
-            <div class="form-group">
-                <label for="exampleInputPassword1">Full Name: </label>
-                <input type="text" name="fullname" class="form-control" id="exampleInputPassword1" placeholder="Enter your full name...">
+            <div class="mb-3">
+                <label for="exampleInputEmail1" class="form-label">Title of the post: </label>
+                <input type="text" class="form-control" name="title" placeholder="Enter the title...">
             </div>
 
-            <button type="submit" name="sbt" class="btn btn-primary">Submit</button>
-            <br><br>
+            <div class="mb-3">
+                <label for="exampleInputEmail1" class="form-label">Content of the post: </label>
+                <textarea class="form-control" name="content" placeholder="Enter the content..." rows="15"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success" name="sbt">Save</button>
         </form>
     </div>
 </body>
 
 </html>
+<?php 
+    if(isset($_POST['sbt'])){
+        include("db.php");
+        $title = $_POST['title'];
+        $content = $_POST['content'];
 
-
-<?php
-if (isset($_POST['sbt'])) {
-    $usname = $_POST['username'];
-    $pwd = $_POST['password'];
-    $fullname = $_POST['fullname'];
-    include("db.php");
-    try {
-        $query = "INSERT INTO users(username, full_name, password) VALUES (?,?,?)";
-        $stmt = $conn->prepare($query);
-        if($stmt->execute([$usname, $fullname, $pwd])){
-            echo '<script>alert("Account has been created!\nYou can login now."); location.href="login.php";</script>';
+        $sql = "INSERT INTO posts(user_id, title, content) VALUES(?,?,?)";
+        $stmt = $conn ->prepare($sql);
+        if($stmt -> execute([$_SESSION['user_id'], $title, $content])){
+            echo '<script>alert("Post is saved."); location.href="myposts.php"</script>';
         }
-    } catch (Exception $e) {
-        echo "Insertion failed!";
     }
-}
 ?>

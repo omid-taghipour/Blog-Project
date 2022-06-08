@@ -6,32 +6,26 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Home</title>
+    <title>Admin Dashboard</title>
 </head>
 
 <body>
     <?php
     @session_start();
+    if (!isset($_SESSION['admin_id'])) {
+        header("location: login.php");
+    }
     ?>
-
     <nav class="navbar navbar-expand-lg navbar navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="index.php">327Blogs</a>
+            <a class="navbar-brand" href="admin-home.php">327Blogs</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
                     <?php
-                    if (isset($_SESSION['user_id'])) {
-                        echo '
-                        <li class="nav-item active">
-                        <a class="nav-link" href="myposts.php"">My posts<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="logout.php"">Logout<span class="sr-only">(current)</span></a>
-                    </li>';
-                    } else if (isset($_SESSION['admin_id'])) {
+                    if (isset($_SESSION['admin_id'])) {
                         echo '<li class="nav-item active">
                         <a class="nav-link" href="pending-posts.php"">Pending posts<span class="sr-only">(current)</span></a>
                     </li>
@@ -43,17 +37,15 @@
                     </li>';
                     } else {
                         echo '<li class="nav-item active">
-                        <a class="nav-link " href="login.php">Login<span class="sr-only">(current)</span></a>
-                        </li>
-                        <li class="nav-item active">
-                        <a class="nav-link " href="signup.php">Sign up<span class="sr-only">(current)</span></a>
-                        </li>';
+                        <a class="nav-link " href="admin-login.php">Login<span class="sr-only">(current)</span></a>
+                    </li>';
                     }
                     ?>
                 </ul>
             </div>
         </div>
     </nav>
+    <br>
     <div class="container">
         <br><br>
         <?php
@@ -73,6 +65,7 @@
                 echo '<div class="card-body">
                       <h5 class="card-title">' . strtoupper($post['title']) . '</h5>
                       <p class="card-text">' . $post['content'] . '</p>
+                      <a href="admin-postinfo.php?id='.$post['post_id'].'" class="btn btn-primary">View post</a>
                     </div>
                   </div><br><br>';
             }

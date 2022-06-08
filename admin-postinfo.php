@@ -13,31 +13,27 @@
     <nav class="navbar navbar-expand-lg navbar navbar-dark bg-primary">
         <?php
         @session_start();
-        if (!isset($_SESSION['user_id'])) {
+        if (!isset($_SESSION['admin_id'])) {
             echo '<script>location.href="login.php"</script>';
         }
         ?>
         <div class="container">
-            <a class="navbar-brand" href="index.php">327Blogs</a>
+            <a class="navbar-brand" href="admin-home.php">327Blogs</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
                     <?php
-                    if (isset($_SESSION['user_id'])) {
+                    if (isset($_SESSION['admin_id'])) {
                         echo '<li class="nav-item active">
-                        <a class="nav-link" href="myposts.php"">My posts<span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="pending-posts.php"">Pending posts<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="rejected-posts.php"">Rejected posts<span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item active">
                         <a class="nav-link" href="logout.php"">Logout<span class="sr-only">(current)</span></a>
-                    </li>';
-                    } else {
-                        echo '<li class="nav-item active">
-                        <a class="nav-link " href="login.php">Login<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                    <a class="nav-link " href="signup.php">Sign up<span class="sr-only">(current)</span></a>
                     </li>';
                     }
                     ?>
@@ -50,18 +46,19 @@
     <div class="container">
         <?php
         include("db.php");
-        if (isset($_POST['sbt'])) {
+        if (isset($_POST['approveBtn'])) {
             $post_id = $_POST['post_id'];
-            $sql = "UPDATE posts SET title = ?, content = ?, upload_time = now(), status = 'Pending' WHERE post_id = ?";
+            $sql = "UPDATE posts SET status = ? WHERE post_id = ?";
             $stmt = $conn->prepare($sql);
-            if ($stmt->execute([$_POST['title'], $_POST['content'], $post_id])) {
-                echo '<script>alert("Updated!"); location.href="myposts.php";</script>';
+            if ($stmt->execute(['Approved', $post_id])) {
+                echo '<script>alert("Post has been approved!"); location.href="pending-posts.php";</script>';
             }
-        } else if (isset($_POST['deleteBtn'])) {
-            $sql = "DELETE FROM posts WHERE post_id = ?";
+        } else if (isset($_POST['rejectBtn'])) {
+            $post_id = $_POST['post_id'];
+            $sql = "UPDATE posts SET status = ? WHERE post_id = ?";
             $stmt = $conn->prepare($sql);
-            if ($stmt->execute([$_POST['post_id']])) {
-                echo '<script>alert("Post is deleted!"); location.href="myposts.php";</script>';
+            if ($stmt->execute(['Rejected', $post_id])) {
+                echo '<script>alert("Post has been rejected!"); location.href="pending-posts.php";</script>';
             }
         } else {
             $post_id = $_GET['id'];
@@ -72,35 +69,41 @@
         $stmt->execute([$post_id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        $sql = "SELECT full_name FROM users WHERE user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$result['user_id']]);
+        $fullname = $stmt->fetch(PDO::FETCH_ASSOC);
+
         ?>
 
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
-            <button type="submit" name="deleteBtn" class="btn btn-danger float-right">Delete this post</button>
-            <br><br>
-            <hr>
             <figure>
                 <blockquote class="blockquote">
                     <h2>
-                        <p>Update your post form</p>
+                        <p>Post Information</p>
                     </h2>
                 </blockquote>
                 <figcaption class="blockquote-footer">
-                    <cite>This post created at <?php echo $result['upload_time']; ?></cite>
+                    <cite>This post created at <?php echo $result['upload_time'] . ' by <b>' . $fullname['full_name'] . '</b>'; ?></cite>
                 </figcaption>
             </figure>
             <h1></h1><br>
             <small><em></em></small>
+            <div class="alert alert-info" role="alert">
+                Curret status of this post is <b><?php echo $result['status']; ?></b>
+            </div>
             <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Title</label>
-                <input type="text" class="form-control" name="title" value="<?php echo $result['title']; ?>">
+                <input type="text" class="form-control" name="title" value="<?php echo $result['title']; ?>" readonly>
             </div>
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Content</label>
-                <textarea type="text" class="form-control" name="content" rows="15"><?php echo $result['content']; ?></textarea>
+                <textarea type="text" class="form-control" name="content" rows="15" readonly><?php echo $result['content']; ?></textarea>
             </div>
-            <button type="submit" name="sbt" class="btn btn-success">Update post</button> &nbsp;
-            <button type="reset" class="btn btn-warning">Reset</button>
+            <button type="submit" name="approveBtn" class="btn btn-success">Approve the post</button> &nbsp;
+            <button type="submit" name="rejectBtn" class="btn btn-danger">Reject the post</button> &nbsp;
+
         </form>
 
     </div>

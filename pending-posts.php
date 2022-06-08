@@ -13,33 +13,29 @@
     <nav class="navbar navbar-expand-lg navbar navbar-dark bg-primary">
         <?php
         @session_start();
-        if (!isset($_SESSION['user_id'])) {
+        if (!isset($_SESSION['admin_id'])) {
             echo '<script>location.href="login.php"</script>';
         }
         ?>
         <div class="container">
-            <a class="navbar-brand" href="index.php">327Blogs</a>
+            <a class="navbar-brand" href="admin-home.php">327Blogs</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
                     <?php
-                    if (isset($_SESSION['user_id'])) {
+                    if (isset($_SESSION['admin_id'])) {
                         echo '<li class="nav-item active">
-                        <a class="nav-link" href="myposts.php"">My posts<span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="pending-posts.php"">Pending posts<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="rejected-posts.php"">Rejected posts<span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item active">
                         <a class="nav-link" href="logout.php"">Logout<span class="sr-only">(current)</span></a>
                     </li>';
-                    } else {
-                        echo '<li class="nav-item active">
-                        <a class="nav-link " href="login.php">Login<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                    <a class="nav-link " href="signup.php">Sign up<span class="sr-only">(current)</span></a>
-                    </li>';
-                    }
+                    } 
                     ?>
                 </ul>
             </div>
@@ -48,31 +44,28 @@
     <br>
 
     <div class="container">
-        <div class="links">
-            <a href="newpost.php" class="btn btn-success float-right">Add a new Post</a>
-        </div>
-        <br><br>
-        <hr>
+
+<br>
         <?php
         include("db.php");
 
-        $query = "SELECT post_id, title, content, upload_time, status FROM posts WHERE user_id = ?";
+        $query = "SELECT post_id, title, content, upload_time, user_id FROM posts WHERE status = 'Pending'";
         $stmt = $conn->prepare($query);
-        $stmt->execute([$_SESSION['user_id']]);
+        $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (!$result) {
-            echo '<div class="alert alert-warning" role="alert"><h1>You have added no post yet!</h1></div>';
+            echo '<div class="alert alert-warning text-center" role="alert"><h1>There is no pending post!</h1></div>';
         } else {
         ?>
-        <br>
-        <h1>Your posts are listed in the table below.</h1>
+        
+        <h1>Pending posts for Approval are listed in the table below.</h1>
         <br>
             <table class="table table-light table-hover">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Title</th>
-                        <th scope="col">Status</th>
+                        <th scope="col">Writter</th>
                         <th scope="col">Actions</th>
                     </tr>
                 </thead>
@@ -81,11 +74,15 @@
                     
                     $counter = 1;
                     foreach($result as $index => $post){
+                        $sql = "SELECT full_name FROM users WHERE user_id = ?";
+                        $stmt = $conn ->prepare($sql);
+                        $stmt ->execute([$post['user_id']]);
+                        $fullname = $stmt -> fetch(PDO::FETCH_ASSOC);
                         echo '<tr?>';
                         echo '<th scope=""row>'.$counter.'</th>';
                         echo '<td scopt="row">'.$post['title'].'</td>';
-                        echo '<td scopt="row">'.$post['status'].'</td>';
-                        echo '<td scopt="row"><a class="btn btn-info" href="postinfo.php?id='.$post['post_id'].'">View post</a></td>';
+                        echo '<td scopt="row">'.$fullname['full_name'].'</td>';
+                        echo '<td scopt="row"><a class="btn btn-info" href="admin-postinfo.php?id='.$post['post_id'].'">View post</a></td>';
                         echo '</tr>';
                         $counter++;
                     }
