@@ -18,12 +18,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="index.php">Home <span class="sr-only">(current)</span></a>
-                    </li>
                     <?php
-                    if (isset($_SESSION['userid'])) {
+                    if (isset($_SESSION['user_id'])) {
                         echo '<li class="nav-item active">
+                        <a class="nav-link" href="myposts.php"">My posts<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item active">
                         <a class="nav-link" href="logout.php"">Logout<span class="sr-only">(current)</span></a>
                     </li>';
                     } else {
@@ -45,7 +45,7 @@
             <h1 class="text-center">Sign up to blog application</h1>
             <p>Please fill the form below to sign up in the system.</p>
         </div>
-        <form action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
             <div class="form-group">
                 <label for="exampleInputEmail1">User Name:</label>
                 <input type="text" name="username" class="form-control" placeholder="Enter your username...">
@@ -70,15 +70,14 @@
 
 <?php
 if (isset($_POST['sbt'])) {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $usname = $_POST['username'];
+    $pwd = $_POST['password'];
     $fullname = $_POST['fullname'];
     include("db.php");
     try {
-        $query = "INSERT INTO users(user_name, user_password, user_fullname) VALUES (?,?,?)";
-        $stmt = $stmt = $conn->prepare($query);
-        $stmt->execute([$username, $password, $fullname]);
-        echo "Done";
+        $query = "INSERT INTO users(username, full_name, password) VALUES (?,?,?)";
+        $stmt = $conn->prepare($query);
+        $stmt->execute([$usname, $fullname, $pwd]);
     } catch (Exception $e) {
         echo "Insertion failed!";
     }
