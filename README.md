@@ -13,7 +13,7 @@ CSS: Used for styling the website's elements. CSS is responsible for defining th
 
 PHP: Used for the website's server-side functionality. PHP is responsible for handling user registration, login, and post creation. It is also responsible for processing user input and communicating with the website's database.
 
-The website's main features include:
+# The website's main features include:
 
 User Registration and Login: Users can create an account on the website by providing their name, email address, and password. Once registered, users can log in to their account to create and manage their blog posts.
 
